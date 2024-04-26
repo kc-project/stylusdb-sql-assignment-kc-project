@@ -1,0 +1,48 @@
+// const parseQuery = require('../step3/queryParser');
+// const readCSV = require('../step2/csvReader');
+
+// async function executeSELECTQuery(query) {
+//     const { fields, table } = parseQuery(query);
+//     const data = await readCSV(`${table}.csv`);
+    
+//     // Filter the fields based on the query
+//     return data.map(row => {
+//         const filteredRow = {};
+//         fields.forEach(field => {
+//             filteredRow[field] = row[field];
+//         });
+//         return filteredRow;
+//     });
+// }
+
+// module.exports = executeSELECTQuery;
+
+
+// src/index.js
+
+const parseQuery = require('../step3/queryParser');
+const readCSV = require('../step2/csvReader');
+
+async function executeSELECTQuery(query) {
+    const { fields, table, whereClause } = parseQuery(query);
+    const data = await readCSV(`${table}.csv`);
+    
+    // Filtering based on WHERE clause
+    const filteredData = whereClause
+        ? data.filter(row => {
+            const [field, value] = whereClause.split('=').map(s => s.trim());
+            return row[field] === value;
+        })
+        : data;
+
+    // Selecting the specified fields
+    return filteredData.map(row => {
+        const selectedRow = {};
+        fields.forEach(field => {
+            selectedRow[field] = row[field];
+        });
+        return selectedRow;
+    });
+}
+
+module.exports = executeSELECTQuery;
